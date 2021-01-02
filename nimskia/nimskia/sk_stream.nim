@@ -2,7 +2,7 @@ import ../wrapper/sk_stream
 import ../wrapper/sk_types
 
 import internals/[
-  native, 
+  native,
   exceptions
 ]
 
@@ -10,15 +10,15 @@ import sk_data
 
 type
   # still not good enough, more work needed here
-  
+
   SkStream* = ref object of SkObject[sk_stream_t]
 
   SkWStream* = ref object of SkObject[sk_wstream_t]
-  
+
   SkStreamRewindable* = ref object of SkStream
-  
+
   SkStreamSeekable* = ref object of SkStreamRewindable
-  
+
   SkStreamAsset* = ref object of SkStreamSeekable
 
   SkFileStream* = ref object of SkStreamAsset
@@ -74,7 +74,7 @@ proc readUInt32*(s: SkStream, buffer: var uint32): bool =
   sk_stream_read_u32(
     cast[ptr sk_stream_t](s.native), buffer.addr)
 
-proc readBool*(s: SkStream, buffer: var bool): bool = 
+proc readBool*(s: SkStream, buffer: var bool): bool =
   sk_stream_read_bool(
     cast[ptr sk_stream_t](s.native), buffer.addr)
 
@@ -82,7 +82,7 @@ proc readBool*(s: SkStream, buffer: var bool): bool =
 proc readByte*(s: SkStream): int8 =
   result = default int8
   discard s.readByte(result)
-  
+
 proc readInt16*(s: SkStream): int16 =
   result = default int16
   discard s.readInt16(result)
@@ -94,7 +94,7 @@ proc readInt32*(s: SkStream): int32 =
 proc readUByte*(s: SkStream): uint8 =
   result = default uint8
   discard s.readUByte(result)
-  
+
 proc readUInt16*(s: SkStream): uint16 =
   result = default uint16
   discard s.readUInt16(result)
@@ -108,24 +108,24 @@ proc readBool*(s: SkStream): bool =
   discard s.readBool(result)
 
 proc skip*(s: SkStream, size:int): int =
-   
+
   sk_stream_skip(
     cast[ptr sk_stream_t](s.native), size)
 
 proc rewind*(s: SkStreamRewindable): bool =
-   
+
   sk_stream_rewind(
     cast[ptr sk_stream_t](s.native))
 
 proc seek*(s: SkStreamSeekable, position:int): bool =
-  
+
   sk_stream_seek(
     cast[ptr sk_stream_t](s.native), position)
 
 proc move*(s: SkStreamSeekable, offset:int): bool =
-  
+
   sk_stream_move(
-    cast[ptr sk_stream_t](s.native), offset)
+    cast[ptr sk_stream_t](s.native), offset.clong)
 
 discard """
 proc memoryBase*(s: SkStream): pointer =
@@ -134,24 +134,24 @@ proc memoryBase*(s: SkStream): pointer =
 """
 
 proc fork*(s: SkStreamSeekable): SkStreamSeekable =
-  new(result) 
+  new(result)
   result.native = sk_stream_fork(
       cast[ptr sk_stream_t](s.native))
 
 proc duplicate*(s: SkStreamRewindable): SkStreamRewindable =
   new(result)
   result.native = sk_stream_duplicate(
-    cast[ptr sk_stream_t](s.native)) 
+    cast[ptr sk_stream_t](s.native))
 
 proc dispose*(s: SkStream) =
     sk_stream_destroy(s.native)
-      
+
 # SkFileStream
 
 proc dispose*(s: SkFileStream) =
   sk_filestream_destroy(
     cast[ptr sk_stream_filestream_t](s.native))
-  
+
 proc isValid*(s: SkFileStream): bool =
   sk_filestream_is_valid(
     cast[ptr sk_stream_filestream_t](s.native))
@@ -159,7 +159,7 @@ proc isValid*(s: SkFileStream): bool =
 proc newSkFileStream*(path: string): SkFileStream =
   new(result)
   result.native = cast[ptr sk_stream_t](sk_filestream_new(path))
-  
+
 proc openSkFileStream*(path: string): SkFileStream =
   let fs = newSkFileStream(path)
   if not fs.isValid():
@@ -202,7 +202,7 @@ proc dispose*(s: SkMemoryStream) =
   sk_memorystream_destroy(
     cast[ptr sk_stream_memorystream_t](s.native))
 
-proc setMemory*(s: SkMemoryStream, data: pointer, length: int, copyData: bool = false) = 
+proc setMemory*(s: SkMemoryStream, data: pointer, length: int, copyData: bool = false) =
   sk_memorystream_set_memory(cast[ptr sk_stream_memorystream_t](s.native), data, length, copyData)
 
 proc setMemory*(s: SkMemoryStream, data: seq[byte], copyData: bool = false) =
@@ -232,19 +232,19 @@ proc writeDecimalAsText*(s: SkWStream, value: int32): bool =
 proc writeBigDecimalAsText*(s: SkWStream, value: int64, digits: int32): bool =
   sk_wstream_write_bigdec_as_text(s.native, value, digits)
 
-proc writeHexAsText*(s: SkWStream, value: uint32, digits: int32): bool = 
+proc writeHexAsText*(s: SkWStream, value: uint32, digits: int32): bool =
   sk_wstream_write_hex_as_text(s.native, value, digits)
 
-proc writeScalarAsText*(s: SkWStream, value: float): bool = 
+proc writeScalarAsText*(s: SkWStream, value: float): bool =
   sk_wstream_write_scalar_as_text(s.native, value)
 
 proc writeBool*(s: SkWStream, value: bool): bool =
   sk_wstream_write_bool(s.native, value)
 
-proc writeScalar*(s: SkWStream, value: float): bool = 
+proc writeScalar*(s: SkWStream, value: float): bool =
   sk_wstream_write_scalar(s.native, value)
 
-proc writeStream*(s: SkWStream, input: SkStream, length: int): bool = 
+proc writeStream*(s: SkWStream, input: SkStream, length: int): bool =
   sk_wstream_write_stream(s.native, input.native, length)
 
 proc newSkFileWStream*(path: string): SkFileWStream =
@@ -265,17 +265,3 @@ proc openSkFileWStream*(path: string): SkFileWStream =
     stream.dispose()
     stream = nil
   return stream
-
-
-
-
-
-
-
-
-
-
-  
-
-
-
