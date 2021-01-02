@@ -1,5 +1,5 @@
 import ../nimskia/[
-  sk_canvas, 
+  sk_canvas,
   sk_colors,
   sk_paint,
   sk_enums,
