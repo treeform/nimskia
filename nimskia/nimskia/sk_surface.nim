@@ -21,7 +21,7 @@ type
 ### SkSurfaceProps
 
 proc newSkSurfaceProps*(pixelGeometry: SkPixelGeometry): SkSurfaceProps =
-  var x: sk_surfaceprops_t 
+  var x: sk_surfaceprops_t
   SkSurfaceProps(native: x.addr, pixelGeometry: pixelGeometry)
 
 ### SkSurface
@@ -29,14 +29,14 @@ proc newSkSurfaceProps*(pixelGeometry: SkPixelGeometry): SkSurfaceProps =
 proc newSkSurface*(info: SkImageInfo, rowBytes: int, props: SkSurfaceProps): SkSurface =
   var surf = sk_surface_new_raster(
     info.native.addr,
-    rowBytes, 
+    rowBytes,
     if isNil props: nil else: props.native
   )
   var nativeCanvas = sk_surface_get_canvas(surf)
   SkSurface(
-    native: surf, 
+    native: surf,
     props: props,
-    canvas: SkCanvas(native: nativeCanvas) 
+    canvas: SkCanvas(native: nativeCanvas)
   )
 
 proc newSkSurface*(info: SkImageInfo): SkSurface =
@@ -49,30 +49,30 @@ proc newSkSurface*(info: SkImageInfo, props: SkSurfacePRops): SkSurface =
   return newSkSurface(info, 0, props)
 
 proc newSkSurface*(
-  ctx: GRContext, 
-  target: GRBackendRenderTarget, 
-  origin: GRSurfaceOrigin, 
+  ctx: GRContext,
+  target: GRBackendRenderTarget,
+  origin: GRSurfaceOrigin,
   colorType: SkColorType,
   colorspace: SkColorspace,
   props: SkSurfaceProps
 ): SkSUrface =
   assert(not isNil ctx, "Context cannot be nil")
-  assert(not isNil target, "Target cannot be nil")  
-  echo $(cast[uint32](ctx))
-  echo $(cast[uint32](target))
-  echo $(cast[uint32](colorType))
-  
+  assert(not isNil target, "Target cannot be nil")
+  # echo $(cast[uint32](ctx))
+  # echo $(cast[uint32](target))
+  # echo $(cast[uint32](colorType))
+
   var surf = sk_surface_new_backend_render_target(
-    ctx.native, 
-    target.native, 
+    ctx.native,
+    target.native,
     origin.gr_surfaceorigin_t,
     colorType.sk_colortype_t,
     if not isNil colorspace: colorspace.native else: nil,
     if not isNil props: props.native else: nil,
   )
   SkSurface(
-    native: surf, 
-    props: props, 
+    native: surf,
+    props: props,
     canvas: SkCanvas(native: sk_surface_get_canvas(surf))
   )
 
